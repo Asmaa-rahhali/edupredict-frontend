@@ -96,6 +96,7 @@ export default function Register() {
           <span role="img" aria-label="education">
             <i class="bi bi-mortarboard"></i>
           </span>{" "}
+          EduPredict
         </h1>
       </div>
 

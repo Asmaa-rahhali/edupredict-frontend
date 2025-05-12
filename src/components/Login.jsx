@@ -72,6 +72,7 @@ export default function Login() {
           <span role="img" aria-label="education">
             <i class="bi bi-mortarboard"></i>
           </span>{" "}
+          EduPredict
         </h1>
       </div>
 
