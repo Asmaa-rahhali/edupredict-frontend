@@ -9,8 +9,9 @@ export default function Register() {
     password: "",
     password2: "",
   });
+
   const [formErrors, setFormErrors] = useState({});
-  const [serverError, setServerError] = useState("");
+  const [serverError, setServerError] = useState([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -46,7 +47,7 @@ export default function Register() {
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setFormErrors({ ...formErrors, [e.target.name]: "" });
-    setServerError("");
+    setServerError([]);
   };
 
   const handleRegister = async (e) => {
@@ -54,33 +55,42 @@ export default function Register() {
     if (!validateForm()) return;
 
     setLoading(true);
-    setServerError("");
+    setServerError([]);
+    setFormErrors({});
 
     try {
       await axios.post("https://edupredict-backend.onrender.com/api/accounts/register/", form);
       navigate("/login");
     } catch (err) {
-  if (err.response?.data) {
-    const data = err.response.data;
-    const messages = [];
+      if (err.response?.data) {
+        const data = err.response.data;
+        const messages = [];
 
-    for (const field in data) {
-      if (Array.isArray(data[field])) {
-        messages.push(data[field][0]); 
+        for (const field in data) {
+          if (Array.isArray(data[field])) {
+            if (form.hasOwnProperty(field)) {
+              setFormErrors((prev) => ({
+                ...prev,
+                [field]: data[field][0],
+              }));
+            } else {
+              messages.push(data[field][0]);
+            }
+          } else {
+            messages.push(data[field]);
+          }
+        }
+
+        setServerError(messages);
       } else {
-        messages.push(data[field]);
+        setServerError(["Erreur lors de l’inscription."]);
       }
+
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    setServerError(messages);
-  } else {
-    setServerError(["Erreur lors de l’inscription."]);
-  }
-
-  console.error(err);
-}
-
-    setLoading(false);
+  };
 
   return (
     <div
@@ -92,10 +102,7 @@ export default function Register() {
     >
       <div className="text-center mb-4">
         <h1 style={{ color: "#0d6efd", fontWeight: "700" }}>
-          <span role="img" aria-label="education">
-            <i class="bi bi-mortarboard"></i>
-          </span>{" "}
-          EduPredict
+          <i className="bi bi-mortarboard"></i> EduPredict
         </h1>
       </div>
 
@@ -107,15 +114,14 @@ export default function Register() {
           <h4 className="mb-4 text-center fw-semibold">Inscription</h4>
 
           {serverError.length > 0 && (
-  <div className="alert alert-danger">
-    <ul className="mb-0">
-      {serverError.map((msg, index) => (
-        <li key={index}>{msg}</li>
-      ))}
-    </ul>
-  </div>
-)}
-
+            <div className="alert alert-danger">
+              <ul className="mb-0">
+                {serverError.map((msg, index) => (
+                  <li key={index}>{msg}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <form onSubmit={handleRegister}>
             <div className="mb-3">
@@ -125,9 +131,7 @@ export default function Register() {
                 name="full_name"
                 value={form.full_name}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.full_name ? "is-invalid" : ""
-                }`}
+                className={`form-control ${formErrors.full_name ? "is-invalid" : ""}`}
                 required
               />
               {formErrors.full_name && (
@@ -142,9 +146,7 @@ export default function Register() {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.email ? "is-invalid" : ""
-                }`}
+                className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
                 required
               />
               {formErrors.email && (
@@ -159,9 +161,7 @@ export default function Register() {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.password ? "is-invalid" : ""
-                }`}
+                className={`form-control ${formErrors.password ? "is-invalid" : ""}`}
                 required
               />
               {formErrors.password && (
@@ -170,17 +170,13 @@ export default function Register() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-bold">
-                Confirmez le mot de passe
-              </label>
+              <label className="form-label fw-bold">Confirmez le mot de passe</label>
               <input
                 type="password"
                 name="password2"
                 value={form.password2}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.password2 ? "is-invalid" : ""
-                }`}
+                className={`form-control ${formErrors.password2 ? "is-invalid" : ""}`}
                 required
               />
               {formErrors.password2 && (
@@ -209,4 +205,4 @@ export default function Register() {
       </div>
     </div>
   );
-}}
+}
