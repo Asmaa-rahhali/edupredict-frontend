@@ -11,7 +11,6 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 function AppContent() {
   const location = useLocation();
 
-  // Pages sans navbar
   const hideNavbarRoutes = ['/login', '/register'];
   const showNavbar = !hideNavbarRoutes.includes(location.pathname);
 

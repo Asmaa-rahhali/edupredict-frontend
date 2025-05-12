@@ -71,13 +71,13 @@ button:focus-visible {
   background-color: #f0f4f8;
 }
 .navbar .nav-link {
-  color: #374151; /* Gris foncé élégant */
+  color: #374151;
   font-weight: 500;
   transition: color 0.2s ease-in-out;
 }
 
 .navbar .nav-link:hover {
-  color: #0d6efd; /* Bleu vif au hover */
+  color: #0d6efd; 
   text-decoration: underline;
 }
 .navbar .nav-link.active {
