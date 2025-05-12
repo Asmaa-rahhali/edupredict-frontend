@@ -4,13 +4,13 @@ import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
-  const [formErrors, setFormErrors] = useState({ email: "", password: "" });
+  const [formErrors, setFormErrors] = useState({});
+  const [serverError, setServerError] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const validateForm = () => {
-    let errors = { email: "", password: "" };
+    const errors = {};
 
     if (!form.email) {
       errors.email = "Veuillez remplir ce champ";
@@ -25,12 +25,13 @@ export default function Login() {
     }
 
     setFormErrors(errors);
-    return Object.values(errors).every((error) => error === "");
+    return Object.keys(errors).length === 0;
   };
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setFormErrors({ ...formErrors, [e.target.name]: "" });
+    setServerError([]);
   };
 
   const handleLogin = async (e) => {
@@ -38,7 +39,7 @@ export default function Login() {
     if (!validateForm()) return;
 
     setLoading(true);
-    setError("");
+    setServerError([]);
 
     try {
       const res = await axios.post(
@@ -49,7 +50,9 @@ export default function Login() {
       localStorage.setItem("refresh", res.data.refresh);
       navigate("/dashboard");
     } catch (err) {
-      setError("Échec de la connexion. Veuillez vérifier vos identifiants.");
+      const message =
+        err.response?.data?.detail || "Échec de la connexion. Vérifiez vos identifiants.";
+      setServerError([message]);
       console.error(err);
     } finally {
       setLoading(false);
@@ -69,7 +72,6 @@ export default function Login() {
           <span role="img" aria-label="education">
             <i class="bi bi-mortarboard"></i>
           </span>{" "}
-          EduPredict
         </h1>
       </div>
 
@@ -80,7 +82,15 @@ export default function Login() {
         <div className="card-body p-4">
           <h4 className="mb-4 text-center fw-semibold">Connexion</h4>
 
-          {error && <div className="alert alert-danger">{error}</div>}
+          {serverError.length > 0 && (
+            <div className="alert alert-danger">
+              <ul className="mb-0">
+                {serverError.map((msg, index) => (
+                  <li key={index}>{msg}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <form onSubmit={handleLogin}>
             <div className="mb-3">
@@ -90,11 +100,8 @@ export default function Login() {
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.email ? "is-invalid" : ""
-                }`}
+                className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
                 placeholder="Entrez votre email"
-                required
               />
               {formErrors.email && (
                 <div className="invalid-feedback">{formErrors.email}</div>
@@ -108,11 +115,8 @@ export default function Login() {
                 name="password"
                 value={form.password}
                 onChange={handleChange}
-                className={`form-control ${
-                  formErrors.password ? "is-invalid" : ""
-                }`}
-                placeholder="****"
-                required
+                className={`form-control ${formErrors.password ? "is-invalid" : ""}`}
+                placeholder="••••••"
               />
               {formErrors.password && (
                 <div className="invalid-feedback">{formErrors.password}</div>

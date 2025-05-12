@@ -9,7 +9,6 @@ export default function Register() {
     password: "",
     password2: "",
   });
-
   const [formErrors, setFormErrors] = useState({});
   const [serverError, setServerError] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -56,37 +55,29 @@ export default function Register() {
 
     setLoading(true);
     setServerError([]);
-    setFormErrors({});
 
     try {
       await axios.post("https://edupredict-backend.onrender.com/api/accounts/register/", form);
       navigate("/login");
     } catch (err) {
-      if (err.response?.data) {
-        const data = err.response.data;
-        const messages = [];
+      const data = err.response?.data;
+      const newFormErrors = {};
+      const newServerErrors = [];
 
-        for (const field in data) {
-          if (Array.isArray(data[field])) {
-            if (form.hasOwnProperty(field)) {
-              setFormErrors((prev) => ({
-                ...prev,
-                [field]: data[field][0],
-              }));
-            } else {
-              messages.push(data[field][0]);
-            }
+      if (data) {
+        for (const key in data) {
+          if (form.hasOwnProperty(key)) {
+            newFormErrors[key] = data[key][0];
           } else {
-            messages.push(data[field]);
+            newServerErrors.push(data[key][0] || data[key]);
           }
         }
-
-        setServerError(messages);
       } else {
-        setServerError(["Erreur lors de l’inscription."]);
+        newServerErrors.push("Erreur lors de l’inscription.");
       }
 
-      console.error(err);
+      setFormErrors(newFormErrors);
+      setServerError(newServerErrors);
     } finally {
       setLoading(false);
     }
@@ -102,7 +93,9 @@ export default function Register() {
     >
       <div className="text-center mb-4">
         <h1 style={{ color: "#0d6efd", fontWeight: "700" }}>
-          <i className="bi bi-mortarboard"></i> EduPredict
+          <span role="img" aria-label="education">
+            <i class="bi bi-mortarboard"></i>
+          </span>{" "}
         </h1>
       </div>
 
@@ -132,7 +125,6 @@ export default function Register() {
                 value={form.full_name}
                 onChange={handleChange}
                 className={`form-control ${formErrors.full_name ? "is-invalid" : ""}`}
-                required
               />
               {formErrors.full_name && (
                 <div className="invalid-feedback">{formErrors.full_name}</div>
@@ -147,7 +139,6 @@ export default function Register() {
                 value={form.email}
                 onChange={handleChange}
                 className={`form-control ${formErrors.email ? "is-invalid" : ""}`}
-                required
               />
               {formErrors.email && (
                 <div className="invalid-feedback">{formErrors.email}</div>
@@ -162,7 +153,6 @@ export default function Register() {
                 value={form.password}
                 onChange={handleChange}
                 className={`form-control ${formErrors.password ? "is-invalid" : ""}`}
-                required
               />
               {formErrors.password && (
                 <div className="invalid-feedback">{formErrors.password}</div>
@@ -177,7 +167,6 @@ export default function Register() {
                 value={form.password2}
                 onChange={handleChange}
                 className={`form-control ${formErrors.password2 ? "is-invalid" : ""}`}
-                required
               />
               {formErrors.password2 && (
                 <div className="invalid-feedback">{formErrors.password2}</div>
