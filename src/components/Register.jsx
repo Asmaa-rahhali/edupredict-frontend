@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
+import { REGISTER_URL } from "../api";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -57,7 +58,7 @@ export default function Register() {
     setServerError("");
 
     try {
-      await axios.post("https://edupredict-backend.onrender.com/api/accounts/register/", form);
+      await axios.post(REGISTER_URL, form);
       navigate("/login");
     } catch (err) {
       const apiError =
