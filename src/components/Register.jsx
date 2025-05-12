@@ -57,20 +57,30 @@ export default function Register() {
     setServerError("");
 
     try {
-      console.log("Formulaire envoyé :", form);
       await axios.post("https://edupredict-backend.onrender.com/api/accounts/register/", form);
       navigate("/login");
     } catch (err) {
-      const apiError =
-        err.response?.data?.email?.[0] ||
-        err.response?.data?.detail ||
-        "Erreur lors de l’inscription.";
-      setServerError(apiError);
-      console.error(err);
-    } finally {
-      setLoading(false);
+  if (err.response?.data) {
+    const data = err.response.data;
+    const messages = [];
+
+    for (const field in data) {
+      if (Array.isArray(data[field])) {
+        messages.push(data[field][0]); 
+      } else {
+        messages.push(data[field]);
+      }
     }
-  };
+
+    setServerError(messages);
+  } else {
+    setServerError(["Erreur lors de l’inscription."]);
+  }
+
+  console.error(err);
+}
+
+    setLoading(false);
 
   return (
     <div
@@ -96,9 +106,16 @@ export default function Register() {
         <div className="card-body p-4">
           <h4 className="mb-4 text-center fw-semibold">Inscription</h4>
 
-          {serverError && (
-            <div className="alert alert-danger">{serverError}</div>
-          )}
+          {serverError.length > 0 && (
+  <div className="alert alert-danger">
+    <ul className="mb-0">
+      {serverError.map((msg, index) => (
+        <li key={index}>{msg}</li>
+      ))}
+    </ul>
+  </div>
+)}
+
 
           <form onSubmit={handleRegister}>
             <div className="mb-3">
@@ -192,4 +209,4 @@ export default function Register() {
       </div>
     </div>
   );
-}
+}}
